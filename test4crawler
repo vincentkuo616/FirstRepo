@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Aug 25 09:30:04 2023
+
+@author: vincentkuo616
+"""
+
+import requests
+from bs4 import BeautifulSoup
+'''
+url = "https://www.gif-vif.com/you-are-a-wizard-doggo"
+res = requests.get(url) # 取得回應
+#print(res)
+
+soup = BeautifulSoup(res.text, 'lxml') # lxml是解析方式
+#print(soup.find(id="mnp_next").find_all("a")[-1].get("href"))
+
+vidio_elements = soup.find_all("img")
+#print(vidio_elements)
+
+tempGif = []
+
+for i in vidio_elements:
+    if "gif"==i.get("src")[-3:] and i.get("src") not in tempGif:
+        tempGif.append(i.get("src"))
+
+print(tempGif)
+
+for i in tempGif:
+    gif = requests.get(i)
+    with open("test\sample.gif", "wb") as f:
+        f.write(gif.content)
+'''
+
+def get_gif(url):
+    title = url.split("/")[-1] # 取得url結尾作為標題
+    print(f"getting gif {title}")
+    res = requests.get(url) # 取得回應
+    
+    # 使用BeautifulSoup解析內容
+    soup = BeautifulSoup(res.text, 'lxml')
+    vidio_elements = soup.find_all("img")
+    tempGif = []
+    fileExtesion = "gif"
+
+    for i in vidio_elements:
+        if "gif"==i.get("src")[-3:] and i.get("src") not in tempGif:
+            tempGif.append(i.get("src"))
+    
+    if tempGif==[]:
+        gif_url = soup.find_all("video")[0].find_all("source")[0].get("src")
+        tempGif.append(gif_url)
+        fileExtesion = gif_url[-3:]
+        
+
+    # 下載gif
+    for i in tempGif:
+        gif = requests.get(i)
+        with open(f"test\{title}.{fileExtesion}", "wb") as f:
+            f.write(gif.content)
+    
+    # 尋找下一個url
+    next_url = soup.find(id="mnp_next").find_all("a")[-1].get("href")
+    
+    return next_url
+
+
+if __name__ == "__main__":
+    url = "https://www.gif-vif.com/you-are-a-wizard-doggo"
+    for i in range(10):
+        url = get_gif(url)
